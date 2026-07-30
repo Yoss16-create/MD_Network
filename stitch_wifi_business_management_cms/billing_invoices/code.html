@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ISP Manager - Semua Tagihan</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "on-secondary-fixed-variant": "#38485d",
+                "on-secondary-fixed": "#0b1c30",
+                "surface-container-low": "#f0f3ff",
+                "tertiary-fixed-dim": "#ffb695",
+                "outline-variant": "#c7c4d8",
+                "surface-bright": "#f9f9ff",
+                "background": "#f9f9ff",
+                "on-tertiary": "#ffffff",
+                "primary-fixed-dim": "#c3c0ff",
+                "inverse-primary": "#c3c0ff",
+                "on-surface-variant": "#464555",
+                "on-secondary-container": "#54647a",
+                "primary-container": "#4f46e5",
+                "inverse-on-surface": "#ecf1ff",
+                "tertiary": "#7e3000",
+                "surface-container-lowest": "#ffffff",
+                "on-background": "#111c2d",
+                "surface-container-highest": "#d8e3fb",
+                "on-primary": "#ffffff",
+                "outline": "#777587",
+                "surface-dim": "#cfdaf2",
+                "secondary-container": "#d0e1fb",
+                "on-primary-fixed-variant": "#3323cc",
+                "on-surface": "#111c2d",
+                "error": "#ba1a1a",
+                "error-container": "#ffdad6",
+                "primary-fixed": "#e2dfff",
+                "on-tertiary-fixed-variant": "#7b2f00",
+                "on-primary-fixed": "#0f0069",
+                "tertiary-fixed": "#ffdbcc",
+                "secondary-fixed": "#d3e4fe",
+                "on-primary-container": "#dad7ff",
+                "surface-tint": "#4d44e3",
+                "on-tertiary-fixed": "#351000",
+                "tertiary-container": "#a44100",
+                "primary": "#3525cd",
+                "on-error-container": "#93000a",
+                "on-error": "#ffffff",
+                "surface": "#f9f9ff",
+                "on-tertiary-container": "#ffd2be",
+                "inverse-surface": "#263143",
+                "secondary": "#505f76",
+                "surface-container": "#e7eeff",
+                "surface-variant": "#d8e3fb",
+                "surface-container-high": "#dee8ff",
+                "on-secondary": "#ffffff",
+                "secondary-fixed-dim": "#b7c8e1"
+              },
+              "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+              },
+              "spacing": {
+                "xs": "4px",
+                "sm": "8px",
+                "md": "16px",
+                "sidebar-width": "260px",
+                "base": "8px",
+                "lg": "24px",
+                "xl": "32px",
+                "container-max": "1440px"
+                
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #F8FAFC;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+    </style>
+</head>
+<body class="font-body-base text-on-surface selection:bg-primary-fixed-dim">
+<!-- Desktop SideNav -->
+<aside class="fixed left-0 top-0 h-full w-[260px] hidden md:flex flex-col bg-surface-container-lowest border-r border-outline-variant shadow-sm z-50">
+<div class="flex flex-col h-full py-6">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">router</span>
+</div>
+<div>
+<h1 class="text-headline-md font-headline-md font-bold text-primary">ISP Manager</h1>
+<p class="font-body-sm text-body-sm text-secondary">Admin Console</p>
+</div>
+</div>
+</div>
+<nav class="flex-grow space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-low transition-colors mx-2 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">dashboard</span>
+<span class="font-label-md text-label-md">DASHBOARD</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-low transition-colors mx-2 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">group</span>
+<span class="font-label-md text-label-md">PELANGGAN</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container/10 text-primary font-bold border-l-4 border-primary mx-2 rounded-r-lg group" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-md text-label-md">TAGIHAN</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-low transition-colors mx-2 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">payments</span>
+<span class="font-label-md text-label-md">PEMBAYARAN</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-low transition-colors mx-2 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">account_balance_wallet</span>
+<span class="font-label-md text-label-md">KEUANGAN</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-low transition-colors mx-2 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">campaign</span>
+<span class="font-label-md text-label-md">PENGINGAT</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-low transition-colors mx-2 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">account_circle</span>
+<span class="font-label-md text-label-md">PROFIL</span>
+</a>
+</nav>
+<div class="px-4 mt-auto border-t border-outline-variant pt-6">
+<button class="w-full py-3 px-4 bg-primary text-on-primary rounded-xl font-bold flex items-center justify-center gap-2 shadow-md hover:opacity-90 transition-all scale-100 active:scale-95">
+<span class="material-symbols-outlined">add_circle</span>
+<span>New Invoice</span>
+</button>
+<div class="mt-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-secondary hover:bg-surface-container-low transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-sm text-body-sm">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-error hover:bg-error-container/10 transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-sm text-body-sm">Logout</span>
+</a>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Shell -->
+<main class="md:ml-[260px] min-h-screen flex flex-col pb-20 md:pb-0">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-16 px-6 bg-surface border-b border-outline-variant sticky top-0 z-40">
+<div class="flex items-center gap-4 flex-grow max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary/20 font-body-sm" placeholder="Cari invoice atau pelanggan..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-3 ml-4">
+<button class="p-2 hover:bg-surface-container-highest rounded-full transition-transform scale-95 active:scale-90">
+<span class="material-symbols-outlined text-secondary">notifications</span>
+</button>
+<button class="p-2 hover:bg-surface-container-highest rounded-full transition-transform scale-95 active:scale-90">
+<span class="material-symbols-outlined text-secondary">help_outline</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant mx-1"></div>
+<div class="flex items-center gap-2 cursor-pointer hover:bg-surface-container-highest p-1 rounded-full pr-3 transition-all">
+<img class="w-8 h-8 rounded-full border border-primary/20 object-cover" data-alt="A professional headshot of a middle-aged tech administrator in a bright office environment. The person is wearing a neat polo shirt and smiling confidently, reflecting a friendly yet authoritative professional persona. The lighting is soft and natural, with a clean background of a modern workspace with soft blue and white tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGujT-UcfxoSqqkFYdS9Q_ZDcTkmJzP0bmXSRq3aKrQr6fA2EZcXjJMQutK-tQCZQbFX4EYFqegBpHKQKYs43GkBmRJAouzX6_ypcSLOnCUR7yuviwcwGhkoZxmDFl2GkYE6KKIPOQvKHbXnijdN71GS5oNArgIqPjkniAnZ_CpN1XS2yCP50mYntIuuNfG-rmbKFE7m0qyE3elL0kz8Pff3jHnZzzIw1sXwHwERtSc2faI9bgFt7SCg"/>
+<span class="font-label-md text-label-md hidden lg:block">Admin ISP</span>
+</div>
+</div>
+</header>
+<!-- Screen Content -->
+<div class="p-4 md:p-8 space-y-8">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-display-lg text-display-lg text-on-surface">Semua Tagihan</h2>
+<p class="text-secondary font-body-base">Kelola seluruh penagihan bulanan pelanggan internet Anda.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-5 py-2.5 bg-surface-container-lowest border border-outline-variant text-secondary rounded-lg font-bold flex items-center gap-2 hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">filter_list</span>
+                        Filter
+                    </button>
+<button class="px-5 py-2.5 bg-primary text-on-primary rounded-lg font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95">
+<span class="material-symbols-outlined">add</span>
+                        Buat Tagihan
+                    </button>
+</div>
+</div>
+<!-- Dashboard Stats Summary (Bento Lite) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="glass-card p-6 rounded-xl shadow-sm hover:border-primary/50 transition-colors group">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">receipt</span>
+</div>
+<span class="text-xs font-bold text-secondary bg-surface-container-high px-2 py-1 rounded">Bulan Ini</span>
+</div>
+<p class="text-on-surface-variant font-label-md mb-1">Total Tagihan</p>
+<h3 class="text-headline-md font-bold text-on-surface">1,284</h3>
+</div>
+<div class="glass-card p-6 rounded-xl shadow-sm hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center text-error">
+<span class="material-symbols-outlined">pending_actions</span>
+</div>
+<span class="text-xs font-bold text-error bg-error-container/20 px-2 py-1 rounded">Urgent</span>
+</div>
+<p class="text-on-surface-variant font-label-md mb-1">Belum Dibayar</p>
+<h3 class="text-headline-md font-bold text-on-surface">142</h3>
+</div>
+<div class="glass-card p-6 rounded-xl shadow-sm hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-full bg-tertiary-container/10 flex items-center justify-center text-tertiary-container">
+<span class="material-symbols-outlined">event_busy</span>
+</div>
+<span class="text-xs font-bold text-tertiary-container bg-tertiary-container/10 px-2 py-1 rounded">Follow Up</span>
+</div>
+<p class="text-on-surface-variant font-label-md mb-1">Jatuh Tempo</p>
+<h3 class="text-headline-md font-bold text-on-surface">28</h3>
+</div>
+<div class="glass-card p-6 rounded-xl shadow-sm hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<span class="text-xs font-bold text-green-600 bg-green-500/10 px-2 py-1 rounded">Success</span>
+</div>
+<p class="text-on-surface-variant font-label-md mb-1">Terbayar (Lunas)</p>
+<h3 class="text-headline-md font-bold text-on-surface">1,114</h3>
+</div>
+</div>
+<!-- Tabs Section -->
+<div class="border-b border-outline-variant">
+<div class="flex gap-8 overflow-x-auto custom-scrollbar">
+<button class="px-1 py-4 border-b-2 border-primary text-primary font-bold whitespace-nowrap text-body-sm">Semua Tagihan</button>
+<button class="px-1 py-4 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap text-body-sm">Buat Tagihan</button>
+<button class="px-1 py-4 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap text-body-sm flex items-center gap-2">
+                        Belum Dibayar
+                        <span class="bg-error text-on-error text-[10px] px-1.5 py-0.5 rounded-full">142</span>
+</button>
+<button class="px-1 py-4 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap text-body-sm">Riwayat</button>
+</div>
+</div>
+<!-- Table Section -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low">
+<tr>
+<th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">No. Invoice</th>
+<th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Pelanggan</th>
+<th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Periode</th>
+<th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Nominal</th>
+<th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Jatuh Tempo</th>
+<th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="px-6 py-4 font-bold text-primary">#INV-20231001</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed font-bold text-xs">AS</div>
+<div>
+<p class="font-bold text-on-surface text-body-sm">Andi Saputra</p>
+<p class="text-on-surface-variant text-[12px]">ID: 9823412</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-on-surface-variant text-body-sm">Okt 2023</td>
+<td class="px-6 py-4 font-bold text-on-surface">Rp 350.000</td>
+<td class="px-6 py-4 text-on-surface-variant text-body-sm">10 Okt 2023</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-error-container text-on-error-container">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                        Belum Dibayar
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<button class="p-2 hover:bg-primary/10 rounded-lg text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="px-6 py-4 font-bold text-primary">#INV-20231002</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold text-xs">BN</div>
+<div>
+<p class="font-bold text-on-surface text-body-sm">Budi Nugraha</p>
+<p class="text-on-surface-variant text-[12px]">ID: 9823415</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-on-surface-variant text-body-sm">Okt 2023</td>
+<td class="px-6 py-4 font-bold text-on-surface">Rp 275.000</td>
+<td class="px-6 py-4 text-on-surface-variant text-body-sm">05 Okt 2023</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-tertiary-container/20 text-tertiary-container">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-container"></span>
+                                        Jatuh Tempo
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<button class="p-2 hover:bg-primary/10 rounded-lg text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="px-6 py-4 font-bold text-primary">#INV-20231003</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed font-bold text-xs">CD</div>
+<div>
+<p class="font-bold text-on-surface text-body-sm">Citra Dewi</p>
+<p class="text-on-surface-variant text-[12px]">ID: 9823419</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-on-surface-variant text-body-sm">Okt 2023</td>
+<td class="px-6 py-4 font-bold text-on-surface">Rp 500.000</td>
+<td class="px-6 py-4 text-on-surface-variant text-body-sm">15 Okt 2023</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-600">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                        Lunas
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<button class="p-2 hover:bg-primary/10 rounded-lg text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- More rows mock -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="px-6 py-4 font-bold text-primary">#INV-20231004</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed-dim flex items-center justify-center text-on-secondary-fixed font-bold text-xs">EP</div>
+<div>
+<p class="font-bold text-on-surface text-body-sm">Eko Pratama</p>
+<p class="text-on-surface-variant text-[12px]">ID: 9823422</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-on-surface-variant text-body-sm">Okt 2023</td>
+<td class="px-6 py-4 font-bold text-on-surface">Rp 350.000</td>
+<td class="px-6 py-4 text-on-surface-variant text-body-sm">10 Okt 2023</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-error-container text-on-error-container">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                        Belum Dibayar
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<button class="p-2 hover:bg-primary/10 rounded-lg text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 bg-surface-container-low flex items-center justify-between">
+<span class="text-on-surface-variant font-body-sm">Showing 1-10 of 1,284 results</span>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-lg border border-outline-variant hover:bg-surface hover:border-primary disabled:opacity-50 disabled:hover:bg-transparent" disabled="">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-primary text-on-primary font-bold text-xs">1</button>
+<button class="w-8 h-8 rounded-lg border border-outline-variant hover:border-primary text-on-surface font-bold text-xs transition-colors">2</button>
+<button class="w-8 h-8 rounded-lg border border-outline-variant hover:border-primary text-on-surface font-bold text-xs transition-colors">3</button>
+<button class="p-2 rounded-lg border border-outline-variant hover:bg-surface hover:border-primary">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Prominent Action Section / Manual Entry -->
+<div class="md:ml-[260px] p-4 md:p-8 pt-0">
+<div class="bg-on-secondary-fixed text-on-secondary-container p-8 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+<div class="relative z-10 text-center md:text-left">
+<h4 class="text-headline-md font-bold text-white mb-2">Catat Pembayaran Manual</h4>
+<p class="text-secondary-fixed-dim max-w-md">Ada pelanggan yang bayar via tunai atau transfer? Klik di sini untuk mencatat transaksi secara instan.</p>
+</div>
+<button class="relative z-10 px-8 py-4 bg-white text-on-background rounded-xl font-extrabold flex items-center gap-3 shadow-2xl hover:bg-surface-container-low transition-all scale-100 hover:scale-105 active:scale-95 group">
+<span class="material-symbols-outlined text-primary group-hover:rotate-12 transition-transform">add_card</span>
+                Catat Pembayaran
+            </button>
+</div>
+</div>
+<!-- Mobile Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 bg-surface border-t border-outline-variant shadow-lg md:hidden px-2">
+<a class="flex flex-col items-center justify-center text-on-surface-variant transition-colors group" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Customers</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold bg-primary-container/10 rounded-xl px-4 py-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt</span>
+<span class="font-label-sm text-label-sm">Billing</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant transition-colors" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<!-- FAB for quick access on mobile -->
+<button class="md:hidden fixed bottom-20 right-4 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center z-50 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<script>
+        // Simple Micro-interactions
+        document.querySelectorAll('button, a').forEach(elem => {
+            elem.addEventListener('click', function(e) {
+                if(this.classList.contains('active:scale-95')) return;
+                this.classList.add('opacity-80');
+                setTimeout(() => this.classList.remove('opacity-80'), 150);
+            });
+        });
+    </script>
+</body></html>

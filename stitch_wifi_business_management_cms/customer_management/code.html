@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ISP Manager - Semua Pelanggan</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #E2E8F0;
+            border-radius: 10px;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface-container-low": "#f0f3ff",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "outline-variant": "#c7c4d8",
+                        "surface-bright": "#f9f9ff",
+                        "background": "#f9f9ff",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "inverse-primary": "#c3c0ff",
+                        "on-surface-variant": "#464555",
+                        "on-secondary-container": "#54647a",
+                        "primary-container": "#4f46e5",
+                        "inverse-on-surface": "#ecf1ff",
+                        "tertiary": "#7e3000",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#111c2d",
+                        "surface-container-highest": "#d8e3fb",
+                        "on-primary": "#ffffff",
+                        "outline": "#777587",
+                        "surface-dim": "#cfdaf2",
+                        "secondary-container": "#d0e1fb",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "on-surface": "#111c2d",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#e2dfff",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "on-primary-fixed": "#0f0069",
+                        "tertiary-fixed": "#ffdbcc",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-primary-container": "#dad7ff",
+                        "surface-tint": "#4d44e3",
+                        "on-tertiary-fixed": "#351000",
+                        "tertiary-container": "#a44100",
+                        "primary": "#3525cd",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "surface": "#f9f9ff",
+                        "on-tertiary-container": "#ffd2be",
+                        "inverse-surface": "#263143",
+                        "secondary": "#505f76",
+                        "surface-container": "#e7eeff",
+                        "surface-variant": "#d8e3fb",
+                        "surface-container-high": "#dee8ff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#b7c8e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "body-base": ["Inter"],
+                        "label-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface">
+<!-- SideNavBar (Predicted Component) -->
+<aside class="fixed left-0 top-0 h-full w-[260px] hidden md:flex flex-col bg-surface-container-lowest dark:bg-inverse-surface border-r border-outline-variant dark:border-outline shadow-sm z-50">
+<div class="flex flex-col h-full py-6">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">wifi_tethering</span>
+</div>
+<div>
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary leading-tight">ISP Manager</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant opacity-70">Admin Console</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-6 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">DASHBOARD</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 bg-primary-container/10 text-primary font-bold border-l-4 border-primary transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-label-md text-label-md">PELANGGAN</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-md text-label-md">TAGIHAN</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-md text-label-md">PEMBAYARAN</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-label-md text-label-md">KEUANGAN</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">campaign</span>
+<span class="font-label-md text-label-md">PENGINGAT</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label-md text-label-md">PROFIL</span>
+</a>
+</nav>
+<div class="px-6 mt-auto pt-6 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-secondary hover:bg-surface-container-low rounded-xl transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-error hover:bg-error-container/10 rounded-xl transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- TopAppBar (Predicted Component) -->
+<header class="fixed top-0 left-0 md:left-[260px] right-0 h-16 flex justify-between items-center px-6 bg-surface dark:bg-background border-b border-outline-variant dark:border-outline z-40">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-body-sm focus:ring-2 focus:ring-primary/20" placeholder="Cari pelanggan atau ID..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-2 sm:gap-4">
+<button class="p-2 hover:bg-surface-container-highest rounded-full transition-transform active:scale-90">
+<span class="material-symbols-outlined text-secondary">notifications</span>
+</button>
+<button class="p-2 hover:bg-surface-container-highest rounded-full transition-transform active:scale-90">
+<span class="material-symbols-outlined text-secondary">help_outline</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant mx-1 sm:mx-2"></div>
+<div class="flex items-center gap-3 pl-2">
+<div class="hidden sm:block text-right">
+<p class="font-label-md text-label-md text-on-surface">Admin Utama</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Super Administrator</p>
+</div>
+<img class="w-10 h-10 rounded-full border-2 border-primary-container/20 object-cover" data-alt="A professional high-resolution headshot of a middle-aged tech administrator with a friendly expression. The person is wearing a clean charcoal polo shirt, set against a blurred modern office background with soft bokeh lighting and a neutral blue-gray color palette consistent with a premium SaaS dashboard aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwy3tTVEMygPimVe3oQ1NsQjX4_PJSI-yABXqh_6G8OnDekPI5QJJLsVFejfvYz7dIpQTaK-nm8pIOI02Iu-q7jYnzOCP8KSC9_jbTr8C3oe4bz-l7lnunYlsLu91A8O_d_BVQbLRmtUWRA95pMEY2P496e4Qy_BuxbsqrnmLjFgvtEN9qkeDmv5u53R8fxlTtNG0XaBOoVv38NJboTON63umCbDG5K-E2QNycnT-G7xjUkqv3IyYgQw"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="pt-16 md:ml-[260px] min-h-screen p-6 pb-24 md:pb-6">
+<!-- Breadcrumbs & Title Section -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+<div>
+<h2 class="font-display-lg text-display-lg text-on-surface">Semua Pelanggan</h2>
+<div class="flex items-center gap-2 mt-1 text-on-surface-variant">
+<span class="font-body-sm text-body-sm">Dashboard</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="font-body-sm text-body-sm font-semibold text-primary">Manajemen Pelanggan</span>
+</div>
+</div>
+<button class="flex items-center justify-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-xl font-bold transition-all hover:opacity-90 active:scale-95 shadow-sm">
+<span class="material-symbols-outlined">person_add</span>
+                Tambah Pelanggan
+            </button>
+</div>
+<!-- Controls / Filters Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
+<div class="md:col-span-5 bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+<input class="flex-1 border-none bg-transparent focus:ring-0 text-body-base" placeholder="Cari Nama, WhatsApp, atau ID Pelanggan..." type="text"/>
+</div>
+<div class="md:col-span-3 bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">map</span>
+<select class="flex-1 border-none bg-transparent focus:ring-0 text-body-base appearance-none cursor-pointer">
+<option value="">Semua Area</option>
+<option value="central">Central</option>
+<option value="north">North</option>
+<option value="south">South</option>
+<option value="west">West</option>
+</select>
+</div>
+<div class="md:col-span-3 bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">filter_list</span>
+<select class="flex-1 border-none bg-transparent focus:ring-0 text-body-base appearance-none cursor-pointer">
+<option value="">Semua Status</option>
+<option value="aktif">Aktif</option>
+<option value="belum_bayar">Belum Bayar</option>
+<option value="jatuh_tempo">Jatuh Tempo</option>
+</select>
+</div>
+<div class="md:col-span-1 flex items-center justify-center bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm hover:bg-surface-container-low cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-secondary">refresh</span>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low">
+<tr>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">ID</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Nama Pelanggan</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">WhatsApp</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Paket</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Area</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Tagihan</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Sample Row 1 (As requested) -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-5">
+<span class="font-body-sm text-body-sm font-semibold text-secondary">ISP-001</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">AS</div>
+<span class="font-body-base text-body-base font-medium">Ahmad Subarjo</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<a class="flex items-center gap-1 text-body-sm text-secondary hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">chat</span>
+                                    08123456789
+                                </a>
+</td>
+<td class="px-6 py-5">
+<span class="font-body-sm text-body-sm">WiFi Family (20 Mbps)</span>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1 font-body-sm text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                                    Central
+                                </span>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-[12px] font-bold bg-[#E8F5E9] text-[#2E7D32]">
+                                    Aktif
+                                </span>
+</td>
+<td class="px-6 py-5">
+<span class="font-body-sm text-body-sm font-medium text-primary">Lunas</span>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 hover:bg-primary-container/10 text-secondary hover:text-primary rounded-lg transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="p-2 hover:bg-primary-container/10 text-secondary hover:text-primary rounded-lg transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Sample Row 2 (Belum Bayar) -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-5">
+<span class="font-body-sm text-body-sm font-semibold text-secondary">ISP-002</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold text-xs">SW</div>
+<span class="font-body-base text-body-base font-medium">Siti Wahyuni</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<a class="flex items-center gap-1 text-body-sm text-secondary hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">chat</span>
+                                    08198765432
+                                </a>
+</td>
+<td class="px-6 py-5">
+<span class="font-body-sm text-body-sm">WiFi Pro (50 Mbps)</span>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1 font-body-sm text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                                    North
+                                </span>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-[12px] font-bold bg-error-container/40 text-error">
+                                    Belum Bayar
+                                </span>
+</td>
+<td class="px-6 py-5">
+<span class="font-body-sm text-body-sm font-medium text-error">Rp 350.000</span>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 hover:bg-primary-container/10 text-secondary hover:text-primary rounded-lg transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="p-2 hover:bg-primary-container/10 text-secondary hover:text-primary rounded-lg transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Sample Row 3 (Jatuh Tempo) -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-5">
+<span class="font-body-sm text-body-sm font-semibold text-secondary">ISP-003</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-tertiary-fixed-dim/30 flex items-center justify-center text-tertiary font-bold text-xs">BP</div>
+<span class="font-body-base text-body-base font-medium">Bambang Pamungkas</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<a class="flex items-center gap-1 text-body-sm text-secondary hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">chat</span>
+                                    08112233445
+                                </a>
+</td>
+<td class="px-6 py-5">
+<span class="font-body-sm text-body-sm">WiFi Basic (10 Mbps)</span>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1 font-body-sm text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                                    South
+                                </span>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-[12px] font-bold bg-[#FFF3E0] text-[#E65100]">
+                                    Jatuh Tempo
+                                </span>
+</td>
+<td class="px-6 py-5">
+<span class="font-body-sm text-body-sm font-medium text-[#E65100]">Rp 150.000</span>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 hover:bg-primary-container/10 text-secondary hover:text-primary rounded-lg transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="p-2 hover:bg-primary-container/10 text-secondary hover:text-primary rounded-lg transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-6 py-4 flex items-center justify-between border-t border-outline-variant bg-surface-container-lowest">
+<span class="text-label-md font-label-md text-on-surface-variant">Menampilkan 1-3 dari 124 pelanggan</span>
+<div class="flex gap-2">
+<button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container-low disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="px-4 py-2 bg-primary text-on-primary rounded-lg font-bold text-label-md">1</button>
+<button class="px-4 py-2 border border-outline-variant rounded-lg hover:bg-surface-container-low font-bold text-label-md">2</button>
+<button class="px-4 py-2 border border-outline-variant rounded-lg hover:bg-surface-container-low font-bold text-label-md">3</button>
+<button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container-low">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Predicted Component) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 bg-surface dark:bg-inverse-surface px-2 md:hidden border-t border-outline-variant shadow-lg rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold bg-primary-container/10 rounded-xl px-3 py-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-sm text-label-sm">Customers</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">receipt</span>
+<span class="font-label-sm text-label-sm">Billing</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<!-- Micro-interaction Scripts -->
+<script>
+        // Simple click effect for table rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                row.classList.add('bg-primary-container/5');
+                setTimeout(() => {
+                    row.classList.remove('bg-primary-container/5');
+                }, 200);
+            });
+        });
+
+        // Search highlight simulation
+        const searchInput = document.querySelector('input[placeholder*="Cari Nama"]');
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if (text.includes(term)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body></html>
