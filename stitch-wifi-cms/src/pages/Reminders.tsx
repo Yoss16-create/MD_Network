@@ -1,17 +1,13 @@
-
-import { useState } from 'react'
-
-interface Reminder {
-  name: string
-  pkg: string
-  amount: string
-  due: string
-  wa: string
-  status: string
-  statusClass: string
-}
+import { useEffect, useState } from 'react'
+import { useData } from '../context/DataContext'
+import * as api from '../services/api'
+import type { Reminder } from '../services/api'
 
 export default function Reminders() {
+
+  const { customers } = useData()
+
+console.log(customers)
   const [activeTab, setActiveTab] = useState('all')
   const [search, setSearch] = useState('')
   const [editingTemplate, setEditingTemplate] = useState(false)
@@ -32,6 +28,14 @@ export default function Reminders() {
     { name: 'Lestari Wijaya', pkg: 'Basic-Lite 20Mbps', amount: 'Rp 175.000', due: '18 Mei 2024', wa: '08133445566', status: 'Pending', statusClass: 'bg-tertiary-container/20 text-tertiary-container' },
   ])
 
+  useEffect(() => {
+    api.getReminders()
+      .then(res => {
+        if (res.reminders) setReminders(res.reminders)
+      })
+      .catch(err => console.warn('[Reminders] Backend tidak tersedia, memakai data lokal:', err))
+  }, [])
+
   const buildText = (r: Reminder) => templateMsg
     .replace('[Nama]', r.name)
     .replace('[Paket]', r.pkg)
@@ -41,6 +45,40 @@ export default function Reminders() {
   const getWALink = (r: Reminder) => {
     const phone = r.wa.startsWith('62') ? r.wa : `62${r.wa.slice(1)}`
     return `https://wa.me/${phone}?text=${encodeURIComponent(buildText(r))}`
+  }
+
+  const persistStatus = (name: string, status: string, statusClass: string) => {
+    api.updateReminder(name, { status, statusClass })
+      .catch(err => console.warn('[Reminders] Gagal sinkron status ke backend:', err))
+  }
+
+  const sendBusiness = async (r: Reminder): Promise<boolean> => {
+    const to = r.wa.startsWith('62') ? r.wa : `62${r.wa.slice(1)}`
+    try {
+      await api.sendWhatsApp({ to, message: buildText(r) })
+      return true
+    } catch (err) {
+      console.warn('[Reminders] Backend sendWhatsApp gagal, fallback ke API langsung:', err)
+      if (!businessConfig.apiUrl || !businessConfig.apiKey) return false
+      try {
+        const res = await fetch(businessConfig.apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${businessConfig.apiKey}` },
+          body: JSON.stringify({ to, message: buildText(r) })
+        })
+        return res.ok
+      } catch {
+        return false
+      }
+    }
+  }
+
+  const toggleStatus = (r: Reminder) => {
+    const next = r.status === 'Gagal'
+      ? { status: 'Pending', statusClass: 'bg-tertiary-container/20 text-tertiary-container' }
+      : { status: 'Gagal', statusClass: 'bg-error-container text-on-error-container' }
+    setReminders(prev => prev.map(item => item.name === r.name ? { ...item, ...next } : item))
+    persistStatus(r.name, next.status, next.statusClass)
   }
 
   const sendMassReminder = () => {
@@ -56,6 +94,7 @@ export default function Reminders() {
       setReminders(prev => prev.map(item =>
         item.status === 'Pending' ? { ...item, status: 'Terkirim', statusClass: 'bg-green-500/10 text-green-600' } : item
       ))
+      pending.forEach(r => persistStatus(r.name, 'Terkirim', 'bg-green-500/10 text-green-600'))
     }
     setShowSendOptions(false)
   }
@@ -69,21 +108,15 @@ export default function Reminders() {
     setBusinessConfig(prev => ({ ...prev, sending: true, results: [], activeTarget: `Mengirim ke ${pending.length} pelanggan...` }))
     const results: string[] = []
     for (const r of pending) {
-      try {
-        const res = await fetch(businessConfig.apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${businessConfig.apiKey}` },
-          body: JSON.stringify({ to: r.wa.startsWith('62') ? r.wa : `62${r.wa.slice(1)}`, message: buildText(r) })
-        })
-        if (res.ok) {
-          results.push(`✅ ${r.name} - Terkirim`)
-          setReminders(prev => prev.map(item => item.name === r.name ? { ...item, status: 'Terkirim', statusClass: 'bg-green-500/10 text-green-600' } : item))
-        } else {
-          results.push(`❌ ${r.name} - Gagal (${res.status})`)
-          setReminders(prev => prev.map(item => item.name === r.name ? { ...item, status: 'Gagal', statusClass: 'bg-error-container text-on-error-container' } : item))
-        }
-      } catch {
-        results.push(`❌ ${r.name} - Error jaringan`)
+      const ok = await sendBusiness(r)
+      if (ok) {
+        results.push(`✅ ${r.name} - Terkirim`)
+        setReminders(prev => prev.map(item => item.name === r.name ? { ...item, status: 'Terkirim', statusClass: 'bg-green-500/10 text-green-600' } : item))
+        persistStatus(r.name, 'Terkirim', 'bg-green-500/10 text-green-600')
+      } else {
+        results.push(`❌ ${r.name} - Gagal`)
+        setReminders(prev => prev.map(item => item.name === r.name ? { ...item, status: 'Gagal', statusClass: 'bg-error-container text-on-error-container' } : item))
+        persistStatus(r.name, 'Gagal', 'bg-error-container text-on-error-container')
       }
       setBusinessConfig(prev => ({ ...prev, activeTarget: `${r.name} selesai`, results: [...results] }))
     }
@@ -94,6 +127,7 @@ export default function Reminders() {
   const handleFreeSendIndividual = (r: Reminder) => {
     window.open(getWALink(r), '_blank')
     setReminders(prev => prev.map(item => item.name === r.name ? { ...item, status: 'Terkirim', statusClass: 'bg-green-500/10 text-green-600' } : item))
+    persistStatus(r.name, 'Terkirim', 'bg-green-500/10 text-green-600')
   }
 
   const handleBusinessSendIndividual = async (r: Reminder) => {
@@ -101,20 +135,13 @@ export default function Reminders() {
       setShowBusinessConfig(true)
       return
     }
-    try {
-      const res = await fetch(businessConfig.apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${businessConfig.apiKey}` },
-        body: JSON.stringify({ to: r.wa.startsWith('62') ? r.wa : `62${r.wa.slice(1)}`, message: buildText(r) })
-      })
-      if (res.ok) {
-        setReminders(prev => prev.map(item => item.name === r.name ? { ...item, status: 'Terkirim', statusClass: 'bg-green-500/10 text-green-600' } : item))
-        alert(`Pesan terkirim ke ${r.name}!`)
-      } else {
-        alert(`Gagal mengirim ke ${r.name} (Status: ${res.status})`)
-      }
-    } catch {
-      alert('Gagal terhubung ke API!')
+    const ok = await sendBusiness(r)
+    if (ok) {
+      setReminders(prev => prev.map(item => item.name === r.name ? { ...item, status: 'Terkirim', statusClass: 'bg-green-500/10 text-green-600' } : item))
+      persistStatus(r.name, 'Terkirim', 'bg-green-500/10 text-green-600')
+      alert(`Pesan terkirim ke ${r.name}!`)
+    } else {
+      alert(`Gagal mengirim ke ${r.name}`)
     }
   }
 
@@ -126,6 +153,7 @@ export default function Reminders() {
       setReminders(prev => prev.map(item =>
         item.status === 'Gagal' ? { ...item, status: 'Terkirim', statusClass: 'bg-green-500/10 text-green-600' } : item
       ))
+      f.forEach(r => persistStatus(r.name, 'Terkirim', 'bg-green-500/10 text-green-600'))
     }
   }
 
@@ -146,10 +174,12 @@ export default function Reminders() {
   }
 
   const addReminder = () => {
-    setReminders(prev => [...prev, {
+    const newReminder: Reminder = {
       name: addForm.name, pkg: addForm.pkg, amount: 'Rp ' + Number(addForm.amount || 0).toLocaleString('id-ID'),
       due: '-', wa: addForm.wa, status: 'Pending', statusClass: 'bg-tertiary-container/20 text-tertiary-container'
-    }])
+    }
+    setReminders(prev => [...prev, newReminder])
+    api.addReminder(newReminder).catch(err => console.warn('[Reminders] Gagal simpan pengingat ke backend:', err))
     setShowAddReminder(false)
     setAddForm({ name: '', pkg: 'WiFi Family (20 Mbps)', amount: '', wa: '' })
   }
@@ -168,8 +198,13 @@ export default function Reminders() {
     <div className="p-4 md:p-8 space-y-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-[32px] font-bold text-on-surface">Pengingat & Notifikasi</h2>
-          <p className="text-secondary text-base">Kirim pengingat tagihan langsung ke WhatsApp pelanggan.</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-on-surface">
+  Pengingat & Notifikasi
+</h2>
+
+<p className="text-sm text-secondary mt-1">
+  Kirim pengingat tagihan langsung ke WhatsApp pelanggan.
+</p>
         </div>
         <div className="flex gap-3 flex-wrap">
           <button onClick={exportReminders} className="px-5 py-2.5 bg-surface-container-lowest border border-outline-variant text-secondary rounded-lg font-bold flex items-center gap-2 hover:bg-surface-container-low">
@@ -183,29 +218,45 @@ export default function Reminders() {
       </div>
 
       {/* Stat Cards - clickable */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {[
           { icon: 'campaign', color: 'bg-primary/10 text-primary', label: 'Total Pengingat', val: reminders.length, action: () => { setActiveTab('all'); setSearch('') } },
           { icon: 'check_circle', color: 'bg-green-500/10 text-green-600', label: 'Terkirim', val: sent, action: () => setActiveTab('sent') },
           { icon: 'schedule', color: 'bg-tertiary-container/10 text-tertiary-container', label: 'Pending', val: pending, action: () => setActiveTab('scheduled') },
           { icon: 'error', color: 'bg-error/10 text-error', label: 'Gagal', val: failed, action: () => setActiveTab('failed') },
         ].map((s) => (
-          <div key={s.label} onClick={s.action} className="glass-card p-6 rounded-xl shadow-sm hover:border-primary/50 transition-colors group cursor-pointer">
-            <div className="flex items-start mb-3"><div className={`w-10 h-10 rounded-full flex items-center justify-center ${s.color}`}><span className="material-symbols-outlined">{s.icon}</span></div></div>
-            <p className="text-on-surface-variant text-[12px] font-semibold tracking-[0.05em] mb-1">{s.label}</p>
-            <h3 className="text-[20px] font-semibold">{s.val}</h3>
-          </div>
+          <div
+  key={s.label}
+  onClick={s.action}
+  className="glass-card p-6 rounded-xl shadow-sm hover:border-primary/50 transition-colors group cursor-pointer"
+>
+  <div className="flex justify-center mb-3">
+    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${s.color}`}>
+      <span className="material-symbols-outlined text-[24px]">
+        {s.icon}
+      </span>
+    </div>
+  </div>
+
+  <p className="text-center text-on-surface-variant text-[12px] font-semibold tracking-[0.05em] mb-1">
+    {s.label}
+  </p>
+
+  <h3 className="text-center text-[22px] font-bold">
+    {s.val}
+  </h3>
+</div>
         ))}
       </div>
 
       {/* Search + Add */}
-      <div className="flex gap-3">
-        <div className="flex-1 bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm flex items-center gap-3">
-          <span className="material-symbols-outlined text-on-surface-variant">search</span>
-          <input value={search} onChange={e => setSearch(e.target.value)} className="flex-1 border-none bg-transparent outline-none text-base" placeholder="Cari pelanggan..." />
+<div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+        <div className="flex-1 bg-surface-container-lowest px-3 py-2 rounded-lg border border-outline-variant shadow-sm flex items-center gap-2 min-w-0">
+          <span className="material-symbols-outlined text-[20px] text-on-surface-variant">search</span>
+          
           {search && <button onClick={() => setSearch('')} className="text-secondary hover:text-primary"><span className="material-symbols-outlined">close</span></button>}
         </div>
-        <button onClick={() => setShowAddReminder(true)} className="px-5 py-2.5 bg-primary text-on-primary rounded-lg font-bold flex items-center gap-2 shadow-md hover:shadow-lg active:scale-95">
+        <button onClick={() => setShowAddReminder(true)} className="px-4 py-2 bg-primary text-on-primary rounded-lg font-medium flex items-center justify-center gap-2 shadow-md whitespace-nowrap">
           <span className="material-symbols-outlined">add</span> Tambah
         </button>
         {failed > 0 && (
@@ -232,44 +283,112 @@ export default function Reminders() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-surface-container-low"><tr>
-              <th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase">Pelanggan</th>
-              <th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase">Paket</th>
-              <th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase">Nominal</th>
-              <th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase">Jatuh Tempo</th>
-              <th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase">WhatsApp</th>
-              <th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase">Status</th>
-              <th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase">Action</th>
-            </tr></thead>
-            <tbody className="divide-y divide-outline-variant">
-              {filtered.map((r) => (
-                <tr key={r.name} className="hover:bg-surface-container-low/50 transition-colors group">
-                  <td className="px-6 py-4"><div className="flex items-center gap-3"><div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${r.status === 'Terkirim' ? 'bg-green-100 text-green-700' : r.status === 'Gagal' ? 'bg-error/10 text-error' : 'bg-primary/10 text-primary'}`}>{r.name.split(' ').map(w => w[0]).join('')}</div><span className="font-bold text-[14px]">{r.name}</span></div></td>
-                  <td className="px-6 py-4 text-[14px]">{r.pkg}</td><td className="px-6 py-4 font-bold">{r.amount}</td>
-                  <td className="px-6 py-4 font-medium text-[14px] text-error">{r.due}</td>
-                  <td className="px-6 py-4"><a href={getWALink(r)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[14px] text-secondary hover:text-primary"><span className="material-symbols-outlined text-sm">chat</span>{r.wa}</a></td>
-                  <td className="px-6 py-4"><span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${r.statusClass}`}>{r.status}</span></td>
-                  <td className="px-6 py-4"><div className="flex gap-1">
-                    {r.status === 'Pending' && (
-                      <>
-                        <button onClick={() => handleFreeSendIndividual(r)} className="p-2 hover:bg-green-500/10 rounded-lg text-green-600" title="Gratis - Buka WA"><span className="material-symbols-outlined text-sm">send</span></button>
-                        <button onClick={() => handleBusinessSendIndividual(r)} className="p-2 hover:bg-blue-500/10 rounded-lg text-blue-600" title="Business API"><span className="material-symbols-outlined text-sm">bolt</span></button>
-                      </>
-                    )}
-                    {(r.status === 'Gagal' || r.status === 'Terkirim') && <button onClick={() => handleFreeSendIndividual(r)} className="p-2 hover:bg-green-500/10 rounded-lg text-green-600" title="Kirim ulang"><span className="material-symbols-outlined text-sm">refresh</span></button>}
-                    <button onClick={() => setReminders(prev => prev.map(item => item.name === r.name ? { ...item, status: item.status === 'Gagal' ? 'Pending' : 'Gagal', statusClass: item.status === 'Gagal' ? 'bg-tertiary-container/20 text-tertiary-container' : 'bg-error-container text-on-error-container' } : item))} className="p-2 hover:bg-primary/10 rounded-lg text-primary"><span className="material-symbols-outlined text-sm">swap_horiz</span></button>
-                  </div></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Reminder Cards */}
+<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+  {filtered.map((r) => (
+    <div
+      key={r.name}
+      className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-5 hover:shadow-md transition"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+              r.status === 'Terkirim'
+                ? 'bg-green-100 text-green-700'
+                : r.status === 'Gagal'
+                ? 'bg-error/10 text-error'
+                : 'bg-primary/10 text-primary'
+            }`}
+          >
+            {r.name
+              .split(' ')
+              .map(w => w[0])
+              .join('')}
+          </div>
+
+          <div>
+            <h4 className="font-bold text-sm">{r.name}</h4>
+            <p className="text-xs text-secondary">{r.wa}</p>
+          </div>
         </div>
-        <div className="px-6 py-4 bg-surface-container-low"><span className="text-[14px]">Menampilkan {filtered.length} dari {reminders.length} pengingat</span></div>
+
+        <span className={`px-3 py-1 rounded-full text-xs font-bold ${r.statusClass}`}>
+          {r.status}
+        </span>
       </div>
+
+
+      {/* Detail */}
+      <div className="space-y-2 text-sm">
+        <div className="flex justify-between">
+          <span className="text-secondary">Paket</span>
+          <span className="font-semibold">{r.pkg}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="text-secondary">Nominal</span>
+          <span className="font-bold">{r.amount}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="text-secondary">Jatuh Tempo</span>
+          <span className="text-error font-semibold">{r.due}</span>
+        </div>
+      </div>
+
+
+      {/* Action */}
+      <div className="flex gap-2 mt-5 pt-4 border-t border-outline-variant">
+
+        {r.status === 'Pending' && (
+          <>
+            <button
+              onClick={() => handleFreeSendIndividual(r)}
+              className="flex-1 py-2 rounded-lg bg-green-500/10 text-green-600 text-sm font-bold"
+            >
+              Kirim WA
+            </button>
+
+            <button
+              onClick={() => handleBusinessSendIndividual(r)}
+              className="px-3 rounded-lg bg-blue-500/10 text-blue-600"
+            >
+              <span className="material-symbols-outlined text-sm">
+                bolt
+              </span>
+            </button>
+          </>
+        )}
+
+        {(r.status === 'Terkirim' || r.status === 'Gagal') && (
+          <button
+            onClick={() => handleFreeSendIndividual(r)}
+            className="flex-1 py-2 rounded-lg bg-green-500/10 text-green-600 text-sm font-bold"
+          >
+            Kirim Ulang
+          </button>
+        )}
+
+        <button
+          onClick={() => toggleStatus(r)}
+          className="px-3 rounded-lg bg-primary/10 text-primary"
+        >
+          <span className="material-symbols-outlined text-sm">
+            swap_horiz
+          </span>
+        </button>
+
+      </div>
+
+    </div>
+  ))}
+</div>
+
+<div className="mt-4 text-sm text-secondary">
+  Menampilkan {filtered.length} dari {reminders.length} pengingat
+</div>
 
       {/* Template Pesan - Editable */}
       <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm">

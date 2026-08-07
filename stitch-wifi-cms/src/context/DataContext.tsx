@@ -1,5 +1,7 @@
 
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import * as api from '../services/api'
+import type { BackendData, BackendTagihan } from '../services/api'
 
 export interface CustomerRecord {
   id: string
@@ -63,9 +65,12 @@ interface DataContextType {
   invoices: InvoiceRecord[]
   setInvoices: (invoices: InvoiceRecord[]) => void
   addInvoice: (inv: InvoiceRecord) => void
+  updateInvoice: (no: string, fields: Partial<InvoiceRecord>) => void
   payments: PaymentRecord[]
   setPayments: (payments: PaymentRecord[]) => void
   addPayment: (p: PaymentRecord) => void
+  loading: boolean
+  apiOnline: boolean
 }
 
 const DataContext = createContext<DataContextType | null>(null)
@@ -75,6 +80,114 @@ const statusMap = (s: string) => {
   if (s === 'Jatuh Tempo') return { statusClass: 'bg-tertiary-container/20 text-tertiary-container', dotClass: 'bg-tertiary-container' }
   if (s === 'Nunggak') return { statusClass: 'bg-red-200 text-red-800', dotClass: 'bg-red-600' }
   return { statusClass: 'bg-error-container text-on-error-container', dotClass: 'bg-error' }
+}
+
+const initialsOf = (name: string) =>
+  (name || '')
+    .trim()
+    .split(/\s+/)
+    .map(x => x[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || '-'
+
+const isLunas = (s?: string) => /lunas/i.test(s ?? '')
+
+function mapCustomers(data: BackendData): CustomerRecord[] {
+  const invsByCust = new Map<string, BackendTagihan[]>()
+  for (const t of data.tagihan) {
+    const list = invsByCust.get(t.id_pelanggan) ?? []
+    list.push(t)
+    invsByCust.set(t.id_pelanggan, list)
+  }
+  return data.pelanggan.map(p => {
+    const invs = (invsByCust.get(p.id) ?? []).sort((a, b) => (b.periode || '').localeCompare(a.periode || ''))
+    const paid = invs.filter(i => isLunas(i.status))
+    const latest = invs[0]
+    const amount = Number(latest?.nominal ?? 0)
+    const hasUnpaid = invs.some(i => !isLunas(i.status))
+    return {
+      id: p.id,
+      name: p.nama,
+      initials: initialsOf(p.nama),
+      wa: p.whatsapp || '-',
+      email: '',
+      pkg: p.paket || '-',
+      area: p.area || '-',
+      status: p.status || (hasUnpaid ? 'Belum Bayar' : 'Aktif'),
+      tagihan: paid.length > 0 && invs.length === paid.length ? 'Lunas' : amount > 0 ? 'Rp ' + amount.toLocaleString('id-ID') : '-',
+      amount,
+      address: p.alamat || '-',
+      joinDate: p.tgl_register || '-',
+      lastPayment: paid[0] ? paid[0].tgl_dibuat || '-' : '-',
+      invoices: invs.map(inv => ({
+        no: inv.no_invoice || inv.id,
+        period: inv.periode || '-',
+        amount: Number(inv.nominal ?? 0),
+        status: inv.status || 'Belum Dibayar',
+        date: isLunas(inv.status) ? inv.tgl_dibuat || inv.jatuh_tempo || '-' : '-',
+      })),
+      history: invs.map(inv => ({
+        time: inv.tgl_dibuat || inv.periode || '-',
+        action: isLunas(inv.status) ? `Pembayaran tagihan ${inv.periode} diterima` : `Tagihan ${inv.periode} dibuat`,
+      })),
+    }
+  })
+}
+
+function mapInvoices(data: BackendData): InvoiceRecord[] {
+  const cust = new Map(data.pelanggan.map(p => [p.id, p]))
+  return data.tagihan.map(t => {
+    const p = cust.get(t.id_pelanggan)
+    const lunas = isLunas(t.status)
+    const status = t.status || 'Belum Dibayar'
+    return {
+      no: t.no_invoice || t.id,
+      customerId: t.id_pelanggan,
+      name: p?.nama || '-',
+      initials: p ? initialsOf(p.nama) : '-',
+      wa: p?.whatsapp || '-',
+      pkg: p?.paket || '-',
+      period: t.periode || '-',
+      amount: Number(t.nominal ?? 0),
+      due: t.jatuh_tempo || '10 ' + (t.periode || ''),
+      status,
+      ...statusMap(status),
+      officer: 'Admin',
+      paymentMethod: lunas ? 'Transfer Bank' : '-',
+      paidDate: lunas ? t.tgl_dibuat || '-' : '-',
+      history: [{ time: t.tgl_dibuat || t.periode || '-', action: lunas ? 'Pembayaran diterima' : 'Tagihan dibuat', user: 'Sistem' }],
+    }
+  })
+}
+
+function mapPayments(data: BackendData): PaymentRecord[] {
+  const cust = new Map(data.pelanggan.map(p => [p.id, p]))
+  const tagihan = new Map(data.tagihan.map(t => [t.id, t]))
+  return data.pembayaran
+    .filter(p => isLunas(p.status))
+    .map(p => {
+      const t = p.id_tagihan ? tagihan.get(p.id_tagihan) : undefined
+      const c = p.id_pelanggan ? cust.get(p.id_pelanggan) : t ? cust.get(t.id_pelanggan) : undefined
+      const paidDate = p.tgl || t?.tgl_dibuat || '-'
+      return {
+        no: p.no_trx || 'TRX-' + p.id,
+        customerId: c?.id || p.id_pelanggan || '',
+        name: c?.nama || '-',
+        initials: c ? initialsOf(c.nama) : '-',
+        wa: c?.whatsapp || '-',
+        method: p.metode || 'Tunai',
+        bank: 'BCA',
+        amount: Number(p.nominal ?? t?.nominal ?? 0),
+        date: paidDate,
+        time: '09:00 WIB',
+        status: p.status || 'Lunas',
+        statusClass: 'bg-green-500/10 text-green-600',
+        invoiceNo: t?.no_invoice || 'N/A',
+        officer: p.petugas || 'Admin',
+        history: [{ time: paidDate, action: 'Pembayaran diterima', user: 'Sistem' }],
+      }
+    })
 }
 
 const defaultCustomers: CustomerRecord[] = [
@@ -138,13 +251,72 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [customers, setCustomers] = useState<CustomerRecord[]>(defaultCustomers)
   const [invoices, setInvoices] = useState<InvoiceRecord[]>(defaultInvoices)
   const [payments, setPayments] = useState<PaymentRecord[]>(defaultPayments)
+  const [loading, setLoading] = useState(true)
+  const [apiOnline, setApiOnline] = useState(false)
 
-  const addCustomer = (c: CustomerRecord) => setCustomers(prev => [...prev, c])
-  const addInvoice = (inv: InvoiceRecord) => setInvoices(prev => [...prev, inv])
-  const addPayment = (p: PaymentRecord) => setPayments(prev => [...prev, p])
+  useEffect(() => {
+    let active = true
+    const loadFromApi = async () => {
+      try {
+        const res = await api.getAll()
+        const d = res.data
+        if (!active) return
+        if (d) {
+          if (d.pelanggan && d.pelanggan.length) setCustomers(mapCustomers(d))
+          if (d.tagihan && d.tagihan.length) setInvoices(mapInvoices(d))
+          if (d.pembayaran && d.pembayaran.length) setPayments(mapPayments(d))
+        }
+        setApiOnline(true)
+      } catch (err) {
+        console.warn('[DataContext] Backend tidak tersedia, memakai data lokal:', err)
+        if (active) setApiOnline(false)
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+    loadFromApi()
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const addCustomer = (c: CustomerRecord) => {
+    setCustomers(prev => [...prev, c])
+    api.createPelanggan({
+      nama: c.name,
+      whatsapp: c.wa,
+      paket: c.pkg,
+      area: c.area,
+      alamat: c.address,
+      status: c.status,
+    }).catch(err => console.warn('[DataContext] Gagal simpan pelanggan ke backend:', err))
+  }
+
+  const addInvoice = (inv: InvoiceRecord) => {
+    setInvoices(prev => [...prev, inv])
+    api.addTagihan({
+      id_pelanggan: inv.customerId,
+      periode: inv.period,
+      nominal: String(inv.amount || 0),
+      jatuh_tempo: inv.due,
+      status: inv.status,
+    }).catch(err => console.warn('[DataContext] Gagal simpan invoice ke backend:', err))
+  }
+
+  const updateInvoice = (no: string, fields: Partial<InvoiceRecord>) => {
+    setInvoices(prev => prev.map(inv => (inv.no === no ? { ...inv, ...fields } : inv)))
+    if (fields.status === 'Lunas') {
+      api.bayarTagihan({ no_invoice: no }).catch(err => console.warn('[DataContext] Gagal update invoice ke backend:', err))
+    }
+  }
+
+  const addPayment = (p: PaymentRecord) => {
+    setPayments(prev => [...prev, p])
+    api.bayarTagihan({ no_invoice: p.invoiceNo }).catch(err => console.warn('[DataContext] Gagal simpan pembayaran ke backend:', err))
+  }
 
   return (
-    <DataContext.Provider value={{ customers, setCustomers, addCustomer, invoices, setInvoices, addInvoice, payments, setPayments, addPayment }}>
+    <DataContext.Provider value={{ customers, setCustomers, addCustomer, invoices, setInvoices, addInvoice, updateInvoice, payments, setPayments, addPayment, loading, apiOnline }}>
       {children}
     </DataContext.Provider>
   )

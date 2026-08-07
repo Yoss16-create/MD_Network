@@ -1,5 +1,6 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import * as api from '../services/api'
 
 export default function Settings() {
   const [general, setGeneral] = useState({
@@ -26,8 +27,35 @@ export default function Settings() {
   const [backupFreq, setBackupFreq] = useState('daily')
   const [saved, setSaved] = useState('')
 
+  useEffect(() => {
+    api.getSettings()
+      .then(res => {
+        const s = res.settings
+        if (!s) return
+        if (s.general) setGeneral(s.general as typeof general)
+        if (s.invoicePrefix) setInvoicePrefix(String(s.invoicePrefix))
+        if (s.dueDays) setDueDays(String(s.dueDays))
+        if (s.lateFee) setLateFee(String(s.lateFee))
+        if (typeof s.autoReminder === 'boolean') setAutoReminder(s.autoReminder)
+        if (s.waApi) setWaApi(String(s.waApi))
+        if (typeof s.waTemplate === 'boolean') setWaTemplate(s.waTemplate)
+        if (s.smtpHost) setSmtpHost(String(s.smtpHost))
+        if (s.smtpPort) setSmtpPort(String(s.smtpPort))
+        if (typeof s.backupAuto === 'boolean') setBackupAuto(s.backupAuto)
+        if (s.backupFreq) setBackupFreq(String(s.backupFreq))
+      })
+      .catch(err => console.warn('[Settings] Backend tidak tersedia, memakai pengaturan lokal:', err))
+  }, [])
+
   const handleSave = (section: string) => {
     setSaved(section)
+    api.saveSettings({
+      section,
+      settings: {
+        general, invoicePrefix, dueDays, lateFee, autoReminder,
+        waApi, waTemplate, smtpHost, smtpPort, backupAuto, backupFreq,
+      },
+    }).catch(err => console.warn('[Settings] Gagal simpan ke backend:', err))
     setTimeout(() => setSaved(''), 3000)
   }
 

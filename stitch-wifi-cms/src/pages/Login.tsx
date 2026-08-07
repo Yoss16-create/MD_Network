@@ -20,10 +20,10 @@ export default function Login() {
     }
   }, [])
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (login(form.email, form.password)) {
+    if (await login(form.email, form.password)) {
       if (remember) {
         localStorage.setItem('md_network_remember', JSON.stringify({ email: form.email, password: form.password }))
       } else {

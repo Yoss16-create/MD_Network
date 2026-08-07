@@ -1,19 +1,58 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
-import TopAppBar from './TopAppBar'
 import BottomNav from './BottomNav'
+import MobileHeader from './MobileHeader'
+
 
 export default function Layout() {
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="
+      min-h-screen
+      bg-slate-50
+      overflow-x-hidden
+    ">
+
+      {/* Sidebar Desktop */}
       <Sidebar />
-      <div className="md:ml-[260px] flex flex-col min-h-screen">
-        <TopAppBar />
-        <main className="flex-1 pb-20 md:pb-8">
+
+
+      {/* Konten Utama */}
+      <main className="
+        w-full
+        md:ml-[200px]
+        min-h-screen
+        pb-20
+        md:pb-0
+      ">
+
+
+        {/* Header Mobile */}
+        <MobileHeader />
+
+
+        <div className="
+          w-full
+          px-3
+          sm:px-4
+          md:px-6
+          pt-16
+          md:pt-4
+          pb-4
+        ">
+
           <Outlet />
-        </main>
-      </div>
+
+        </div>
+
+
+      </main>
+
+
+      {/* Menu bawah HP */}
       <BottomNav />
+
+
     </div>
   )
 }

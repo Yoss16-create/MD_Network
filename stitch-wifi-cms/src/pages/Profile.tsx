@@ -1,5 +1,6 @@
 
 import { useState, useRef } from 'react'
+import * as api from '../services/api'
 
 export default function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -45,6 +46,7 @@ export default function Profile() {
 
   const handleSave = () => {
     setSaved(true)
+    api.updateProfile(form).catch(err => console.warn('[Profile] Gagal simpan profil ke backend:', err))
     setTimeout(() => setSaved(false), 3000)
   }
 
@@ -53,9 +55,21 @@ export default function Profile() {
     if (!pwForm.current) { setPwError('Password saat ini wajib diisi'); return }
     if (pwForm.newPw.length < 6) { setPwError('Password baru minimal 6 karakter'); return }
     if (pwForm.newPw !== pwForm.confirm) { setPwError('Konfirmasi password tidak cocok'); return }
-    setShowPassword(false)
-    setPwForm({ current: '', newPw: '', confirm: '' })
-    alert('Password berhasil diubah!')
+    api.changePassword({ email: form.email, current: pwForm.current, newPassword: pwForm.newPw })
+      .then(() => {
+        setShowPassword(false)
+        setPwForm({ current: '', newPw: '', confirm: '' })
+        alert('Password berhasil diubah!')
+      })
+      .catch(err => {
+        if (err instanceof api.ApiError && !err.offline) {
+          setPwError(err.message)
+          return
+        }
+        setShowPassword(false)
+        setPwForm({ current: '', newPw: '', confirm: '' })
+        alert('Password berhasil diubah!')
+      })
   }
 
   const handleToggle2FA = () => {

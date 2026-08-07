@@ -1,19 +1,7 @@
-plugins = []
-headers = []
-redirects = []
-
-[functions]
-
-[functions."*"]
-
 [build]
-publish = "C:\\Users\\Admin\\OneDrive\\Documents\\yos\\MD_Network\\stitch-wifi-cms\\dist"
-publishOrigin = "ui"
-commandOrigin = "ui"
-base = "C:\\Users\\Admin\\OneDrive\\Documents\\yos\\MD_Network\\stitch-wifi-cms"
+base = "stitch-wifi-cms"
 command = "npm run build"
-
-[build.environment]
+publish = "dist"
 
 [build.processing]
 

@@ -1,21 +1,9 @@
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import * as api from '../services/api'
+import type { Transaction } from '../services/api'
 
-interface Transaction {
-  date: string
-  desc: string
-  category: string
-  catClass: string
-  amount: number
-  amtClass: string
-  officer: string
-  invoiceNo: string
-  pelanggan: string
-  metode: string
-  month: string
-}
-
-const allTransactions: Transaction[] = [
+const defaultTransactions: Transaction[] = [
   { date: '12 Juni 2024, 09:15', desc: 'Pembayaran Tagihan INV-00982 (Budi Santoso)', category: 'Pemasukan', catClass: 'bg-emerald-100 text-emerald-800', amount: 350000, amtClass: 'text-emerald-600', officer: 'Admin_Dhea', invoiceNo: 'INV-00982', pelanggan: 'Budi Santoso', metode: 'Transfer Bank (BCA)', month: 'Juni 2024' },
   { date: '11 Juni 2024, 14:30', desc: 'Pembelian Kabel Fiber Optic 200m', category: 'Pengeluaran', catClass: 'bg-error-container/20 text-error', amount: 1250000, amtClass: 'text-error', officer: 'Teknisi_Rian', invoiceNo: 'N/A', pelanggan: 'N/A', metode: 'Kas Operasional', month: 'Juni 2024' },
   { date: '15 Juni 2024, 14:00', desc: 'Pembayaran Bulk 45 Pelanggan (Juni)', category: 'Pemasukan', catClass: 'bg-emerald-100 text-emerald-800', amount: 18000000, amtClass: 'text-emerald-600', officer: 'Sistem', invoiceNo: 'BULK-JUN', pelanggan: '45 Pelanggan', metode: 'Auto Debet', month: 'Juni 2024' },
@@ -36,33 +24,45 @@ const allTransactions: Transaction[] = [
   { date: '25 April 2024, 14:00', desc: 'Pembayaran Tagihan INV-00962 (Lestari Wijaya)', category: 'Pemasukan', catClass: 'bg-emerald-100 text-emerald-800', amount: 150000, amtClass: 'text-emerald-600', officer: 'Admin_Bagus', invoiceNo: 'INV-00962', pelanggan: 'Lestari Wijaya', metode: 'QRIS (GoPay)', month: 'April 2024' },
 ]
 
-const months = [...new Set(allTransactions.map(t => t.month))]
-
-const monthlyData: Record<string, { income: number; expense: number; count: number }> = {}
-allTransactions.forEach(t => {
-  if (!monthlyData[t.month]) monthlyData[t.month] = { income: 0, expense: 0, count: 0 }
-  monthlyData[t.month].count++
-  if (t.category === 'Pemasukan') monthlyData[t.month].income += t.amount
-  else monthlyData[t.month].expense += t.amount
-})
-
 const formatRupiah = (n: number) => 'Rp ' + n.toLocaleString('id-ID')
 
 export default function Financial() {
+  const [transactions, setTransactions] = useState<Transaction[]>(defaultTransactions)
   const [category, setCategory] = useState('')
-  const [selectedPeriod, setSelectedPeriod] = useState('Bulan Ini')
+  const [selectedPeriod, setSelectedPeriod] = useState('Semua')
   const [showPeriodPicker, setShowPeriodPicker] = useState(false)
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
   const [showExportModal, setShowExportModal] = useState(false)
   const [showBudgetDetail, setShowBudgetDetail] = useState(false)
 
+  useEffect(() => {
+    api.getTransactions()
+      .then(res => {
+        if (res.transactions) setTransactions(res.transactions)
+      })
+      .catch(err => console.warn('[Financial] Backend tidak tersedia, memakai data lokal:', err))
+  }, [])
+
+  const months = useMemo(() => [...new Set(transactions.map(t => t.month))], [transactions])
+
+  const monthlyData = useMemo(() => {
+    const map: Record<string, { income: number; expense: number; count: number }> = {}
+    transactions.forEach(t => {
+      if (!map[t.month]) map[t.month] = { income: 0, expense: 0, count: 0 }
+      map[t.month].count++
+      if (t.category === 'Pemasukan') map[t.month].income += t.amount
+      else map[t.month].expense += t.amount
+    })
+    return map
+  }, [transactions])
+
   const currentMonthIndex = months.length - 1
 
   const periodTransactions = useMemo(() => {
-    if (selectedPeriod === 'Semua') return allTransactions
-    if (selectedPeriod === 'Bulan Ini') return allTransactions.filter(t => t.month === months[currentMonthIndex])
-    return allTransactions.filter(t => t.month === selectedPeriod)
-  }, [selectedPeriod])
+    if (selectedPeriod === 'Semua') return transactions
+    if (selectedPeriod === 'Bulan Ini') return transactions.filter(t => t.month === months[currentMonthIndex])
+    return transactions.filter(t => t.month === selectedPeriod)
+  }, [selectedPeriod, transactions, months, currentMonthIndex])
 
   const periodIncome = periodTransactions.filter(t => t.category === 'Pemasukan').reduce((s, t) => s + t.amount, 0)
   const periodExpense = periodTransactions.filter(t => t.category === 'Pengeluaran').reduce((s, t) => s + t.amount, 0)
@@ -102,8 +102,13 @@ export default function Financial() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-[32px] font-bold tracking-[-0.02em] text-on-surface">Laporan Keuangan</h2>
-          <p className="text-[14px] text-on-surface-variant">Ringkasan aktivitas finansial ISP Anda — {selectedPeriod}.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800">
+  Laporan Keuangan
+</h1>
+
+<p className="text-sm text-slate-500 mt-1">
+  Pantau pemasukan dan transaksi keuangan.
+</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
@@ -309,39 +314,292 @@ export default function Financial() {
         </div>
       </div>
 
-      {/* Transaction Table */}
-      <div className="glass-card rounded-2xl shadow-sm overflow-hidden border border-outline-variant">
-        <div className="p-6 border-b border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4">
-          <h4 className="text-[20px] font-semibold tracking-[-0.01em] text-on-surface">Riwayat Transaksi</h4>
-          <div className="relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">filter_list</span>
-            <select value={category} onChange={e => setCategory(e.target.value)} className="pl-10 pr-8 py-2 bg-white border border-outline-variant rounded-xl text-[14px] appearance-none focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer">
-              <option value="">Semua Kategori</option><option value="Pemasukan">Pemasukan</option><option value="Pengeluaran">Pengeluaran</option>
-            </select>
-          </div>
-        </div>
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left border-collapse">
-            <thead><tr className="bg-surface-container-low"><th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase">Tanggal</th><th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase">Deskripsi</th><th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase">Kategori</th><th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase">Jumlah</th><th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase">Petugas</th><th className="px-6 py-4 text-[12px] font-semibold tracking-[0.05em] text-on-surface-variant uppercase text-right">Aksi</th></tr></thead>
-            <tbody className="divide-y divide-outline-variant">
-              {filtered.map((t, i) => (
-                <tr key={i} onClick={() => setSelectedTx(t)} className="hover:bg-surface-container-lowest transition-colors cursor-pointer">
-                  <td className="px-6 py-4 text-[14px]">{t.date}</td><td className="px-6 py-4 text-[14px] font-medium">{t.desc}</td>
-                  <td className="px-6 py-4"><span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold ${t.catClass}`}>{t.category}</span></td>
-                  <td className={`px-6 py-4 text-[14px] font-bold ${t.amtClass}`}>{formatRupiah(t.amount)}</td><td className="px-6 py-4 text-[14px]">{t.officer}</td>
-                  <td className="px-6 py-4 text-right"><button onClick={(e) => { e.stopPropagation(); setSelectedTx(t) }} className="p-1 hover:bg-surface-container-highest rounded-full transition-colors"><span className="material-symbols-outlined text-on-surface-variant">visibility</span></button></td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr><td colSpan={6} className="px-6 py-12 text-center text-secondary text-[14px]">Tidak ada transaksi untuk periode ini</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        <div className="p-6 bg-surface-container-lowest border-t border-outline-variant flex items-center justify-between">
-          <p className="text-[14px] text-on-surface-variant">Menampilkan {filtered.length} dari {allTransactions.length} transaksi</p>
-        </div>
-      </div>
+      {/* Transaction Card */}
+
+<div className="
+glass-card
+rounded-2xl
+shadow-sm
+border
+border-outline-variant
+overflow-hidden
+">
+
+<div className="
+p-6
+border-b
+border-outline-variant
+flex
+flex-col
+sm:flex-row
+justify-between
+gap-4
+">
+
+<h4 className="
+text-[20px]
+font-semibold
+text-on-surface
+">
+Riwayat Transaksi
+</h4>
+
+
+<select
+
+value={category}
+
+onChange={(e)=>setCategory(e.target.value)}
+
+className="
+px-4
+py-2
+rounded-xl
+border
+border-outline-variant
+bg-white
+text-sm
+"
+
+>
+
+<option value="">
+Semua Kategori
+</option>
+
+<option value="Pemasukan">
+Pemasukan
+</option>
+
+<option value="Pengeluaran">
+Pengeluaran
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+<div className="
+p-6
+grid
+grid-cols-1
+md:grid-cols-2
+xl:grid-cols-3
+gap-5
+">
+
+
+{
+filtered.map((t,i)=>(
+
+
+<div
+
+key={i}
+
+onClick={()=>setSelectedTx(t)}
+
+className="
+bg-white
+rounded-2xl
+border
+border-outline-variant
+p-5
+cursor-pointer
+hover:shadow-lg
+transition
+"
+
+
+>
+
+
+<div className="
+flex
+justify-between
+items-start
+mb-4
+">
+
+
+<div>
+
+<p className="
+text-xs
+text-secondary
+">
+
+{t.date}
+
+</p>
+
+
+<h5 className="
+font-bold
+text-on-surface
+mt-2
+">
+
+{t.desc}
+
+</h5>
+
+
+</div>
+
+
+<span className={`
+
+px-3
+py-1
+rounded-full
+text-xs
+font-bold
+
+${t.catClass}
+
+`}>
+
+{t.category}
+
+</span>
+
+
+</div>
+
+
+
+
+<div className="
+space-y-3
+text-sm
+">
+
+
+<div className="
+flex
+justify-between
+">
+
+<span className="text-secondary">
+Jumlah
+</span>
+
+
+<span className={`font-bold ${t.amtClass}`}>
+
+{formatRupiah(t.amount)}
+
+</span>
+
+</div>
+
+
+
+<div className="
+flex
+justify-between
+">
+
+<span className="text-secondary">
+Petugas
+</span>
+
+
+<span className="font-medium">
+
+{t.officer}
+
+</span>
+
+</div>
+
+
+
+<div className="
+flex
+justify-between
+">
+
+<span className="text-secondary">
+Metode
+</span>
+
+
+<span>
+
+{t.metode}
+
+</span>
+
+</div>
+
+
+</div>
+
+
+
+<button
+
+onClick={(e)=>{
+
+e.stopPropagation()
+
+setSelectedTx(t)
+
+}}
+
+className="
+mt-4
+w-full
+py-2
+rounded-xl
+bg-primary/10
+text-primary
+font-bold
+text-sm
+hover:bg-primary/20
+"
+
+>
+
+Lihat Detail
+
+</button>
+
+
+
+</div>
+
+
+))
+
+}
+
+
+
+</div>
+
+
+
+<div className="
+p-6
+border-t
+border-outline-variant
+text-sm
+text-secondary
+">
+
+Menampilkan {filtered.length} dari {transactions.length} transaksi
+
+</div>
+
+
+</div>
 
       {/* Detail Modal */}
       {selectedTx && (

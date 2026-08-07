@@ -1,23 +1,32 @@
 
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import * as api from '../services/api'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
 
-  const handleReset = (e: React.FormEvent) => {
+  const handleReset = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     if (!email) {
       setError('Masukkan email Anda!')
       return
     }
-    const users = JSON.parse(localStorage.getItem('md_network_users') || '[]')
-    if (!users.find((u: { email: string }) => u.email === email)) {
-      setError('Email tidak ditemukan!')
-      return
+    try {
+      await api.forgotPassword({ email })
+    } catch (err) {
+      if (!(err instanceof api.ApiError && err.offline)) {
+        setError('Email tidak ditemukan!')
+        return
+      }
+      const users = JSON.parse(localStorage.getItem('md_network_users') || '[]')
+      if (!users.find((u: { email: string }) => u.email === email)) {
+        setError('Email tidak ditemukan!')
+        return
+      }
     }
     setSent(true)
     setError('')

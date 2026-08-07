@@ -1,7 +1,8 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import * as api from '../services/api'
 
-interface User {
+export interface User {
   id: string
   name: string
   email: string
@@ -11,8 +12,8 @@ interface User {
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string) => boolean
-  register: (name: string, email: string, password: string, company: string) => boolean
+  login: (email: string, password: string) => Promise<boolean>
+  register: (name: string, email: string, password: string, company: string) => Promise<boolean>
   logout: () => void
   isAuthenticated: boolean
 }
@@ -39,6 +40,16 @@ function saveUsers(users: (User & { password: string })[]) {
   localStorage.setItem(USERS_KEY, JSON.stringify(users))
 }
 
+function toUser(u: api.ApiUser): User {
+  return {
+    id: u.id,
+    name: u.nama,
+    email: u.email,
+    role: u.role,
+    company: 'MD_Network',
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
 
@@ -47,28 +58,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (stored) setUser(JSON.parse(stored))
   }, [])
 
-  const login = (email: string, password: string): boolean => {
-    const users = getUsers()
-    const found = users.find(u => u.email === email && u.password === password)
-    if (found) {
-      const { password: _, ...userData } = found
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const res = await api.login({ email, password })
+      const u = res.user
+      if (!u) return false
+      const userData = toUser(u)
+      setUser(userData)
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData))
+      return true
+    } catch (err) {
+      if (err instanceof api.ApiError && !err.offline) return false
+      const users = getUsers()
+      const found = users.find(u => u.email === email && u.password === password)
+      if (found) {
+        const { password: _, ...userData } = found
+        setUser(userData)
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData))
+        return true
+      }
+      return false
+    }
+  }
+
+  const register = async (name: string, email: string, password: string, company: string): Promise<boolean> => {
+    try {
+      const res = await api.register({ name, email, password, company })
+      const u = res.user
+      if (!u) return false
+      const userData = toUser(u)
+      setUser(userData)
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData))
+      return true
+    } catch (err) {
+      if (err instanceof api.ApiError && !err.offline) return false
+      const users = getUsers()
+      if (users.find(u => u.email === email)) return false
+      const id = `USR-${String(users.length + 1).padStart(3, '0')}`
+      const newUser = { id, name, email, password, role: 'Administrator', company }
+      saveUsers([...users, newUser])
+      const { password: _, ...userData } = newUser
       setUser(userData)
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData))
       return true
     }
-    return false
-  }
-
-  const register = (name: string, email: string, password: string, company: string): boolean => {
-    const users = getUsers()
-    if (users.find(u => u.email === email)) return false
-    const id = `USR-${String(users.length + 1).padStart(3, '0')}`
-    const newUser = { id, name, email, password, role: 'Administrator', company }
-    saveUsers([...users, newUser])
-    const { password: _, ...userData } = newUser
-    setUser(userData)
-    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData))
-    return true
   }
 
   const logout = () => {

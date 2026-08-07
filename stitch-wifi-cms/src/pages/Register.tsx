@@ -10,7 +10,7 @@ export default function Register() {
   const [error, setError] = useState('')
   const [showPw, setShowPw] = useState(false)
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     if (!form.name || !form.email || !form.password || !form.company) {
@@ -25,7 +25,7 @@ export default function Register() {
       setError('Password minimal 6 karakter!')
       return
     }
-    const success = register(form.name, form.email, form.password, form.company)
+    const success = await register(form.name, form.email, form.password, form.company)
     if (success) {
       navigate('/')
     } else {
