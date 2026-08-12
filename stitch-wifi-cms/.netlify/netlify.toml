@@ -3,6 +3,8 @@ base = "stitch-wifi-cms"
 command = "npm run build"
 publish = "dist"
 
+[build.environment]
+VITE_API_URL = "https://script.google.com/macros/s/AKfycbx-BPLFzWG8s9e89iPnAv8TjeKxpPowJsgXEhSIclHcjxA1idU7aD9BQ5jdqogcEHC-bw/exec"
 [build.processing]
 
 [build.processing.css]

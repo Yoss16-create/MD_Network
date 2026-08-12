@@ -18,28 +18,31 @@ export default function Layout() {
 
 
       {/* Konten Utama */}
-      <main className="
-        w-full
-        md:ml-[200px]
-        min-h-screen
-        pb-20
-        md:pb-0
-      ">
-
+      <main
+        className="
+          w-full
+          md:ml-[220px]
+          min-h-screen
+          pb-20
+          md:pb-0
+        "
+      >
 
         {/* Header Mobile */}
         <MobileHeader />
 
 
-        <div className="
-          w-full
-          px-3
-          sm:px-4
-          md:px-6
-          pt-16
-          md:pt-4
-          pb-4
-        ">
+        <div
+          className="
+            w-full
+            px-3
+            sm:px-4
+            md:px-6
+            pt-20
+            md:pt-4
+            pb-4
+          "
+        >
 
           <Outlet />
 
@@ -49,7 +52,7 @@ export default function Layout() {
       </main>
 
 
-      {/* Menu bawah HP */}
+      {/* Navigasi bawah Mobile */}
       <BottomNav />
 
 

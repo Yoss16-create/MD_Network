@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 @import 'tailwindcss';
 
-@theme {
+@theme { 
   --color-on-secondary-fixed-variant: #38485d;
   --color-on-secondary-fixed: #0b1c30;
   --color-surface-container-low: #f0f3ff;
